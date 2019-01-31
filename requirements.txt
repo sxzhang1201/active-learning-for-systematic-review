@@ -1,0 +1,12 @@
+imbalanced_learn==0.3.3
+numpy==1.14.3
+scipy==1.1.0
+pandas==0.22.0
+peewee==2.10.2
+nltk==3.3
+matplotlib==2.2.2
+PmedConnect==0.1.2
+imblearn==0.0
+progressbar2==3.38.0
+scikit_learn==0.20.1
+xlsxwriter==1.1.2
