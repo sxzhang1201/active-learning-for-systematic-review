@@ -13,6 +13,10 @@ Chapter 5 Active Learning Model Design
 
 Chapter 6 Evaluation of Active Learning Moddel
 
+### Note (January 2019)
+run_baseline.py, run_similarity.py, and result_analysis.py are updated codes for further investigation after thesis project. 
+
+
 ## Getting Started 
 
 ### Prerequisites
@@ -43,8 +47,6 @@ Checks database against the qrel files and checks whether everything was success
 
 ##### clean docs
 Run preprocessing on the documents and store as a feature matrix.
-
-
 
 #### 2. run_baseline_design.py in 'baseline_model' folder
 
