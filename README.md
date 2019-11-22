@@ -1,5 +1,5 @@
 
-# Active learning for Workload Reduction of Automated Screening in Systematic Reviews
+# Active learning for Workload Reduction of Automated Screening in Systematic Reviews (incomplete)
 
 This repository contains the code that implements the research described in Shuxin Zhang's master thesis. He carried out this work for his Master Medical Informatics at the University of Amsterdam. The project was supervised by Sílvia Delgado Olabarriaga (tutor) and Allard van Altena (mentor) from the Department of Clinical Epidemiology, Biostatistics, and Bioinformatics, Amsterdam University Medical Center. With special thanks to the CLEF eHealth Lab for providing the necessary data.
 
