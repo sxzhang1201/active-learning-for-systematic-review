@@ -3,7 +3,7 @@ numpy==1.14.3
 scipy==1.1.0
 pandas==0.22.0
 peewee==2.10.2
-nltk==3.3
+nltk==3.4.5
 matplotlib==2.2.2
 PmedConnect==0.1.2
 imblearn==0.0
