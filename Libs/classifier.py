@@ -3,7 +3,10 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import confusion_matrix
 import Libs.file_storage as fs
-import numpy as np, basic_funcs, config
+from Libs.sampling_compat import resample
+import numpy as np
+import basic_funcs
+import config
 
 class ModelBuilder(object):
   def __init__(self, matrix_collection, review_names, label_list, grid_parameters, run_similarity = False):
@@ -31,9 +34,7 @@ class ModelBuilder(object):
 
 
   def split_dataset(self, test_review_name):
-    training_review_names = self.review_names
-
-    training_review_names.remove(test_review_name)
+    training_review_names = [r for r in self.review_names if r != test_review_name]
 
     X_train, y_train = self.matrix_collection.get_training_set(training_review_names, self.label_list)
 
@@ -82,8 +83,8 @@ class ModelBuilder(object):
     else:
       X_train, y_train = self.dataset['X_train'], self.dataset['y_train']
 
-    sampler = RandomUnderSampler(return_indices = False)
-    undersampled_X_train, undersampled_y_train = sampler.fit_sample(X_train, y_train)
+    sampler = RandomUnderSampler()
+    undersampled_X_train, undersampled_y_train = resample(sampler, X_train, y_train)
 
     if len(undersampled_y_train) < config.NUMBER_CV:
       return

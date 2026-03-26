@@ -1,15 +1,14 @@
+import os
 import pandas as pd
-import xlsxwriter
 import numpy as np
+import config
 
 
 def correlation():
+  inp = os.path.join(config.CONSOLIDATION_DIR, 'correlation_input.xlsx')
+  out = os.path.join(config.CONSOLIDATION_DIR, 'correlation_output.xlsx')
+  os.makedirs(config.CONSOLIDATION_DIR, exist_ok=True)
 
-  # Read the xlsx file that contains the variables to be analysed with each column representing one variable.
-  df = pd.read_excel('../Consolidation/correlation_input.xlsx')
-
-  # Perform Pearson coefficents analysis
+  df = pd.read_excel(inp)
   cov = df.corr()
-
-  # Export the results
-  cov.to_excel('../Consolidation/correlation_output.xlsx', sheet_name='sheet1', index=False)
+  cov.to_excel(out, sheet_name='sheet1', index=False)

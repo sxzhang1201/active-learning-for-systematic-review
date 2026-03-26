@@ -1,15 +1,15 @@
-import matplotlib
-matplotlib.use('TKAgg')
+import config
+config.configure_matplotlib()
 import matplotlib.pyplot as plt
 
 from sklearn import linear_model
 import numpy as np
 import pickle
+import os
 
-from basic_funcs import delete_row_csr, load_added_value_results
+from basic_funcs import delete_row_csr, load_added_value_results, load_full_dataset
 from active_learning_model.query_strategy import choose_query
 from active_learning_model.importance_test import assign_importance
-from basic_funcs import load_full_dataset
 
 
 def active_learning(index, query_strategy, importance=None):
@@ -178,7 +178,9 @@ def active_learning(index, query_strategy, importance=None):
     'wss@100': wss_100_list
   }
 
-  with open('../Consolidation/added_value/{}_added_value.pickle'.format(index), 'wb') as handle:
+  out_path = os.path.join(config.CONSOLIDATION_ADDED_VALUE, '{}_added_value.pickle'.format(index))
+  os.makedirs(config.CONSOLIDATION_ADDED_VALUE, exist_ok=True)
+  with open(out_path, 'wb') as handle:
     pickle.dump(result_obj, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
   return result_obj
@@ -218,7 +220,8 @@ def plot_added_value():
   plt.axhline(y=0, color='r', linestyle='dashed', label='Baseline WSS')
   plt.legend()
   # plt.show()
-  plt.savefig('../Figure/Trend_Diff_WSS@100.pdf')
+  os.makedirs(os.path.dirname(config.ADDED_VALUE_TREND_FIGURE), exist_ok=True)
+  plt.savefig(config.ADDED_VALUE_TREND_FIGURE)
 
 
 def get_result_table():

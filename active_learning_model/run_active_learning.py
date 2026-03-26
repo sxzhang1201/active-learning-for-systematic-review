@@ -1,9 +1,18 @@
+import os
+import sys
+
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _ROOT not in sys.path:
+  sys.path.insert(0, _ROOT)
+
+import config
 from active_learning_model.query_strategy import test_query_strategy, plot_query_strategy
 from active_learning_model.importance_test import test_importance, plot_importance, plot_relevant_importance
 import recipe
 
 
 if __name__ == '__main__':
+  config.ensure_output_dirs()
   partial_sets = [1, 2, 3, 4, 5]
 
   optimal_alpha = recipe.OPTIMAL_ALPHA

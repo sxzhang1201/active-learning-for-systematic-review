@@ -1,14 +1,15 @@
+import os
 import pickle
 import numpy as np
-import matplotlib
-matplotlib.use('TKAgg')
+import config
+config.configure_matplotlib()
 import matplotlib.pyplot as plt
 
 from basic_funcs import load_dataset, calculate_wss_95
 from sklearn import linear_model
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
-import config
+from Libs.sampling_compat import resample
 
 
 def imba_tech(X_train, y_train, imba_type, random_seed):
@@ -21,15 +22,14 @@ def imba_tech(X_train, y_train, imba_type, random_seed):
   :return: re-sampled data (including one array-like matrix and one list) or the same data (for 'weighting' imba_type)
   """
   if imba_type == 'random_under':
-    # Initiate a sampler for undesampling
-    rus = RandomUnderSampler(return_indices=False, random_state=random_seed)
-    X_train, y_train = rus.fit_sample(X_train, y_train)
+    rus = RandomUnderSampler(random_state=random_seed)
+    X_train, y_train = resample(rus, X_train, y_train)
 
   elif imba_type == 'random_over':
-    # Initiate a sampler for oversampling
     ros = RandomOverSampler(random_state=random_seed)
-    X_train, y_train = ros.fit_sample(X_train, y_train)
+    X_train, y_train = resample(ros, X_train, y_train)
 
+  # 'none', 'weighting': no resampling here
   return X_train, y_train
 
 
@@ -105,6 +105,7 @@ def run_class_imbalance(partial_sets, optimal_alpha, optimal_tol, repeat):
     # Put four lists together in one big list used for the plotting
     imba_list.append(result_list)
 
+  os.makedirs(os.path.dirname(config.CLASS_IMBALANCE_RESULTS), exist_ok=True)
   # Store results of this experiment
   with open(config.CLASS_IMBALANCE_RESULTS, 'wb') as handle:
     pickle.dump(imba_list, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -149,9 +150,9 @@ def plot_class_imbalance():
       plt.scatter(x[:10], y[:10], c=color[0], alpha=0.6, s=16)
 
       for j in range(5):
-        print(j)
         plt.scatter(x[10 * j: 10 * j + 10], y[10 * j: 10 * j + 10], c=color[j], alpha=0.6, s=16)
 
   # plt.show()
+  os.makedirs(os.path.dirname(config.CLASS_IMBALANCE_FIGURE), exist_ok=True)
   plt.savefig(config.CLASS_IMBALANCE_FIGURE)
   plt.close()

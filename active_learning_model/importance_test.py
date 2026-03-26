@@ -1,15 +1,16 @@
-import matplotlib
-matplotlib.use('TKAgg')
+import config
+config.configure_matplotlib()
 import matplotlib.pyplot as plt
 
 from basic_funcs import load_results, load_dataset, delete_row_csr
 import numpy as np
 import pickle
+import os
 from sklearn import linear_model
 from sklearn.metrics import confusion_matrix
 from active_learning_model.query_strategy import choose_query
 from baseline_model.class_imbalance import imba_tech
-import config, recipe
+import recipe
 
 
 def assign_importance(y_update, importance):
@@ -163,8 +164,11 @@ def run_importance(partial_set, query_strategy, optimal_alpha, optimal_tol, impo
     'burden': burden_list,
   }
 
-  with open('../Consolidation/sample_weight/{}_importance_{}_undersamp_{}.pickle'.
-                format(partial_set, importance, random_seed), 'wb') as handle:
+  out_path = os.path.join(
+      config.CONSOLIDATION_SAMPLE_WEIGHT,
+      '{}_importance_{}_undersamp_{}.pickle'.format(partial_set, importance, random_seed))
+  os.makedirs(config.CONSOLIDATION_SAMPLE_WEIGHT, exist_ok=True)
+  with open(out_path, 'wb') as handle:
     pickle.dump(result_obj, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
   return result_obj
@@ -178,6 +182,7 @@ def test_importance(partial_sets, optimal_alpha, optimal_tol):
   :param optimal_tol: float, the optimal value of tolerance
   :return:
   """
+  config.ensure_output_dirs()
 
   importance_list = [1, 2, 4, 6, 8, 10, 20, 30, 40]
 
@@ -251,6 +256,7 @@ def plot_importance():
       plt.scatter(x[5 * j: 5 * j + 5], y[5 * j: 5 * j + 5], c=color[j], alpha=0.6, s=16)
 
   # plt.show()
+  os.makedirs(os.path.dirname(config.DOCUMENT_WEIGHT), exist_ok=True)
   plt.savefig(config.DOCUMENT_WEIGHT)
 
 
@@ -304,4 +310,5 @@ def plot_relevant_importance():
       plt.scatter(x[5 * j: 5 * j + 5], y[5 * j: 5 * j + 5], c=color[j], alpha=0.6, s=16)
 
   # plt.show()
+  os.makedirs(os.path.dirname(config.RELEVANT_DOCUMENT_WEIGHT), exist_ok=True)
   plt.savefig(config.RELEVANT_DOCUMENT_WEIGHT)

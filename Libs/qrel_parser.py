@@ -1,4 +1,6 @@
+import os
 import pandas
+
 
 class QrelParser(object):
 
@@ -16,7 +18,16 @@ class QrelParser(object):
   # Read qrel file into pandas dataframe
   def readFile(self, filename, qrels_header):
     self.filename = filename
-    self.qrel_data = pandas.read_csv(self.filename, sep = "\s+", names = qrels_header)
+    if not os.path.isfile(filename):
+      raise FileNotFoundError(
+          "CLEF qrel file not found:\n  {path}\n\n"
+          "These files are not stored in the git repo. Copy the CLEF eHealth task "
+          "relevance labels into:\n  Database/CLEF_data/\n"
+          "using the names set in config.py (default: qrel_abs_train, qrel_abs_test).\n"
+          "Format: whitespace-separated columns review_id, unused, pmid, included (0/1).".format(
+              path=filename))
+    self.qrel_data = pandas.read_csv(
+        self.filename, sep=r'\s+', engine='python', names=qrels_header)
 
 
   # Fetch a batch of size N from the read qrel file

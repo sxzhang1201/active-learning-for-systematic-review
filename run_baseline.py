@@ -1,3 +1,10 @@
+import os
+import sys
+
+_ROOT = os.path.dirname(os.path.abspath(__file__))
+if _ROOT not in sys.path:
+  sys.path.insert(0, _ROOT)
+
 from multiprocessing import Pool
 from functools import partial
 import Libs.file_storage as fs
@@ -31,6 +38,6 @@ print('starting parallel processing')
 # Fix parameters of run_fold function
 parallel_func = partial(clf.run_review)
 
-with Pool(processes = config.NUM_CORES) as pool:
+with Pool(processes=config.effective_pool_processes()) as pool:
   # Parallelise the iterations
   pool.map(parallel_func, review_names)

@@ -1,4 +1,12 @@
+import os
+import sys
+
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _ROOT not in sys.path:
+  sys.path.insert(0, _ROOT)
+
 import numpy as np
+import config
 from baseline_model.tf_idf import run_tf_idf, plot_tf_idf
 from baseline_model.class_imbalance import run_class_imbalance, plot_class_imbalance
 from baseline_model.grid_search import run_grid_search, heatmap
@@ -6,6 +14,7 @@ from baseline_model.grid_search import run_grid_search, heatmap
 
 if __name__ == '__main__':
 
+  config.ensure_output_dirs()
   partial_sets = [1, 2, 3, 4, 5]
 
   alphas = list(10.0 ** -np.arange(1, 8))

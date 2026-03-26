@@ -4,10 +4,10 @@ import config
 
 
 def get_articles():
+  q = db.Article.select(db.Article.title, db.Article.abstract).order_by(db.Article.id)
   if config.DEBUG is True:
-    return db.Article.select(db.Article.title, db.Article.abstract).limit(10).execute()
-  else:
-    return db.Article.select(db.Article.title, db.Article.abstract).execute()
+    q = q.limit(10)
+  return q.execute()
 
 
 def get_pmids():
@@ -20,27 +20,21 @@ def get_pmids():
 
 
 def get_labels():
+  q = db.Article.select(db.Article.included).order_by(db.Article.id)
   if config.DEBUG is True:
-    labels = db.Article.select(db.Article.included).limit(10).execute()
-  else:
-    labels = db.Article.select(db.Article.included).execute()
-
-  return [x.included for x in labels]
+    q = q.limit(10)
+  return [x.included for x in q.execute()]
 
 
 def get_review_names():
+  q = db.Article.select(db.Article.review_id).order_by(db.Article.id)
   if config.DEBUG is True:
-    review_id_query = db.Article.select(db.Article.review_id).limit(10).execute()
-  else:
-    review_id_query = db.Article.select(db.Article.review_id).execute()  
-
-  review_ids = [x.review_id for x in review_id_query]
-
-  return review_ids
+    q = q.limit(10)
+  return [x.review_id for x in q.execute()]
 
 
 def get_review_indices():
-  review_id_query = db.Article.select(db.Article.review_id).execute()
+  review_id_query = db.Article.select(db.Article.review_id).order_by(db.Article.id).execute()
 
   review_ids = [x.review_id for x in review_id_query]
 

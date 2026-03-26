@@ -23,7 +23,7 @@ class DocumentCollection(object):
 
 
   def get_num_relevant_docs(self):
-    relevant_docs = [x for x in self.documents if x.label is 1]
+    relevant_docs = [x for x in self.documents if bool(x.label)]
 
     return len(relevant_docs)
 
@@ -41,7 +41,7 @@ class DocumentCollection(object):
 
 
   def get_by_review(self, review_name):
-    return [x for x in self.documents if x.review_name is review_name]
+    return [x for x in self.documents if x.review_name == review_name]
 
 
   def add_document(self, new_document):

@@ -18,11 +18,16 @@ def vectorize(document_collection):
 
   corpus = document_collection.get_content()
 
-  min_freq = document_collection.get_num_relevant_docs() * 0.01
-  max_freq = document_collection.get_num_docs() * 0.9
+  n_docs = document_collection.get_num_docs()
+  n_rel = document_collection.get_num_relevant_docs()
+  # Original thesis logic: thresholds as document *counts* (not proportions as floats > 1).
+  # sklearn CountVectorizer: int min_df/max_df = absolute #documents; float must be in (0, 1].
+  min_df = max(1, int(n_rel * 0.01)) if n_rel else 1
+  max_df = max(1, min(n_docs, int(n_docs * 0.9)))
+  if min_df > max_df:
+    max_df = min_df
 
-  # Initiate token-count based vectorizer
-  vectorizer = CountVectorizer(min_df = min_freq, max_df = max_freq)
+  vectorizer = CountVectorizer(min_df=min_df, max_df=max_df)
 
   # Learn all tokens in the corpus
   vectorizer.fit(corpus)
@@ -67,13 +72,15 @@ def get_cosine_similarity(matrix_collection):
     # Get the subset of review documents
     review_subset = matrix[l:r,:]
 
-    # Get the mean vector for this review
-    review_means.append(np.mean(review_subset, axis = 0))
+    # Get the mean vector for this review (dense 1d; avoid np.matrix for sklearn)
+    mu = np.mean(review_subset, axis=0)
+    review_means.append(np.asarray(mu, dtype=np.float64).ravel())
 
-  # Stack the mean vectors of all reviews into a matrix
   review_matrix = np.vstack(review_means)
 
-  # Calculate the cosine similarity between all reviews
+  # scikit-learn rejects np.matrix; ensure ndarray
+  review_matrix = np.asarray(review_matrix, dtype=np.float64)
+
   cos_sim = cosine_similarity(review_matrix)
   
   # Put into a pandas dataframe where we can add row and

@@ -1,4 +1,6 @@
-import config, pickle
+import os
+import config
+import pickle
 
 
 def store_classifier(i, feature_type, classifier_obj, dataset_num = None):
@@ -7,6 +9,7 @@ def store_classifier(i, feature_type, classifier_obj, dataset_num = None):
   if feature_type == 'tm':
     dataset_name = 'classifier_%i' % dataset_num
 
+  os.makedirs(config.CLASSIFIER_LOCATION, exist_ok=True)
   with open(config.CLASSIFIER_LOCATION + '/%i_%s_%s.pickle' % (i, feature_type, dataset_name), 'wb') as handle:
     pickle.dump(classifier_obj, handle, protocol = pickle.HIGHEST_PROTOCOL)
 
@@ -71,6 +74,7 @@ def store_results(review_name, data, run_similarity = False, similarity_size = N
       'results': [data]
     }
 
+  os.makedirs(os.path.dirname(dataset_name), exist_ok=True)
   with open(dataset_name, 'wb') as handle:
     pickle.dump(data, handle, protocol = pickle.HIGHEST_PROTOCOL)
 
@@ -100,16 +104,13 @@ def load_matrix(name):
 
 
 def store_matrix(name, matrix_object):
+  os.makedirs(config.TEXT_DATA_LOCATION, exist_ok=True)
   with open(config.TEXT_DATA_LOCATION + '/%s.pickle' % name, 'wb') as handle:
     pickle.dump(matrix_object, handle, protocol = pickle.HIGHEST_PROTOCOL)
     
 
 def file_exists(name):
-  try:
-    with open(name, 'rb') as handle:
-      return handle
-  except (FileNotFoundError, OSError, IOError) as e:
-    return False
+  return os.path.isfile(name)
 
 
 def read_file(name):

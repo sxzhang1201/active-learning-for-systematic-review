@@ -1,12 +1,12 @@
-import matplotlib
-matplotlib.use('TKAgg')
+import config
+config.configure_matplotlib()
 import matplotlib.pyplot as plt
 
 from basic_funcs import load_dataset, calculate_wss_95
 from sklearn import linear_model
 import pickle
 import numpy as np
-import config
+import os
 
 
 def run_tf_idf(optimal_alpha, optimal_tol, partial_sets, test_types):
@@ -51,6 +51,7 @@ def run_tf_idf(optimal_alpha, optimal_tol, partial_sets, test_types):
     compare_list.append(wss_list)
 
   # Store results of this experiment
+  os.makedirs(os.path.dirname(config.TF_IDF_RESULTS), exist_ok=True)
   with open(config.TF_IDF_RESULTS, 'wb') as handle:
     pickle.dump(compare_list, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -80,5 +81,6 @@ def plot_tf_idf():
     plt.scatter(x, y, c='r', alpha=0.6, s=16)
 
   # plt.show()
+  os.makedirs(os.path.dirname(config.TF_IDF_FIGURE), exist_ok=True)
   plt.savefig(config.TF_IDF_FIGURE)
   plt.close()

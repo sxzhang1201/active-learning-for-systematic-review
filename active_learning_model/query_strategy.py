@@ -1,5 +1,5 @@
-import matplotlib
-matplotlib.use('TKAgg')
+import config
+config.configure_matplotlib()
 import matplotlib.pyplot as plt
 
 from basic_funcs import load_results, load_dataset, delete_row_csr
@@ -8,7 +8,8 @@ import pickle, random
 from sklearn import linear_model
 from sklearn.metrics import confusion_matrix
 from baseline_model.class_imbalance import imba_tech
-import recipe, config
+import recipe
+import os
 
 
 def choose_query(distance, query_strategy):
@@ -158,9 +159,11 @@ def run_query_strategy(partial_set, query_strategy, optimal_alpha, optimal_tol, 
     'burden': burden_list,
   }
 
-  # Store the result dictionary
-  with open('../Consolidation/query_strategy/{}_{}_seed_{}_undersamp.pickle'.format(partial_set, query_strategy,
-                                                                                 random_seed), 'wb') as handle:
+  out_path = os.path.join(
+      config.CONSOLIDATION_QUERY_STRATEGY,
+      '{}_{}_seed_{}_undersamp.pickle'.format(partial_set, query_strategy, random_seed))
+  os.makedirs(config.CONSOLIDATION_QUERY_STRATEGY, exist_ok=True)
+  with open(out_path, 'wb') as handle:
     pickle.dump(result_obj, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
   return result_obj
@@ -176,6 +179,7 @@ def test_query_strategy(partial_sets, optimal_alpha, optimal_tol):
   :param optimal_tol: float, the optimal value of tolerance
   :return: List of results are stored.
   """
+  config.ensure_output_dirs()
 
   # List of query strategies to be tested
   query_strategies = ['least_confidence', 'certainty_positive', 'certainty_positive_negative']
@@ -246,4 +250,5 @@ def plot_query_strategy():
       plt.scatter(x[5 * j: 5 * j + 5], y[5 * j: 5 * j + 5], c=color[j], alpha=0.6, s=16)
 
   # plt.show()
+  os.makedirs(os.path.dirname(config.QUERY_STRATEGY_FIGURE), exist_ok=True)
   plt.savefig(config.QUERY_STRATEGY_FIGURE)

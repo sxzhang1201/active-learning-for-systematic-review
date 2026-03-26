@@ -1,3 +1,10 @@
+import os
+import sys
+
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _ROOT not in sys.path:
+  sys.path.insert(0, _ROOT)
+
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.preprocessing import MaxAbsScaler
 import pandas as pd
@@ -32,7 +39,9 @@ def build_indices(review_ids):
   review_indices = {}
 
   # Load qrel_abs_train txt file
-  clef_data = pd.read_csv(config.TRAIN_QREL_LOCATION, sep="\s+", names=['review_id', 'q0', 'pmid', 'included'])
+  clef_data = pd.read_csv(
+      config.TRAIN_QREL_LOCATION, sep=r'\s+', engine='python',
+      names=['review_id', 'q0', 'pmid', 'included'])
 
   # Get index of documents for each review
   for review_id in review_ids:
@@ -94,9 +103,8 @@ def train_test_split(array, label, review_set, st_type, naming, review_ids):
     elif st_type == 'tf_idf':
 
       transformer = TfidfTransformer()
-
       X_train = transformer.fit_transform(X_train)
-      X_test = transformer.fit_transform(X_test)
+      X_test = transformer.transform(X_test)
 
     # Store data sets in a dictionary
     dataset_obj = {
@@ -106,8 +114,9 @@ def train_test_split(array, label, review_set, st_type, naming, review_ids):
       'y_test': y_test
     }
 
-    # Store the data object as a pickle file in the Dataset file
-    with open('../Datasets/{}_{}_{}.pickle'.format(naming, count, st_type), 'wb') as handle:
+    path = config.dataset_pickle_path(naming, count, st_type)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'wb') as handle:
       pickle.dump(dataset_obj, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     count += 1
@@ -122,19 +131,41 @@ def run_train_test_split():
   3. a list of labels for the training set;
   4. a list of labels for the test set;
   """
-  # Load all documents
+  config.ensure_output_dirs()
+  # Ensure schema exists (Peewee creates tables on import for a new DB file).
+  import Database.db  # noqa: F401
+
   conn = sq.connect(config.DB_FILE)
-  documents = pd.read_sql_query('select pubmed_id, review_id, included, title, abstract from article ', conn)
+  documents = pd.read_sql_query(
+      'select pubmed_id, review_id, included, title, abstract from article order by rowid',
+      conn,
+  )
+  conn.close()
+
+  if documents.empty:
+    raise RuntimeError(
+        "The article table is empty. Populate the database first:\n"
+        "  1) python data_preparation/fetch_raw.py\n"
+        "  2) python data_preparation/insert_docs.py\n"
+        "  3) python data_preparation/clean_docs.py  # writes {}\n"
+        "  4) python data_preparation/dataset_split.py".format(config.DOC_TERM_MATRIX)
+    )
 
   # Identify unique review IDs
   review_ids = documents['review_id'].unique()
+  n_reviews = len(review_ids)
 
   # Set seed for random sampling
   np.random.seed(2)
 
-  # List of Reviews in the partial data set and full data set
-  partial_set = list(np.random.choice(review_ids, 10, replace=False))
-  full_set = list(review_ids.copy())
+  # Partial set: up to 10 reviews (thesis design); shrink if DB has fewer reviews.
+  n_partial = min(10, n_reviews)
+  if n_partial < 10:
+    print('Note: only {} unique review_id(s) in DB; partial_set size is {} (not 10).'.format(
+        n_reviews, n_partial))
+
+  partial_set = list(np.random.choice(review_ids, n_partial, replace=False))
+  full_set = list(review_ids)
 
   # Load array (X) and labels (Y) of all documents
   with (open(config.DOC_TERM_MATRIX, "rb")) as openfile:
@@ -149,3 +180,7 @@ def run_train_test_split():
   # Train-test split of the full dataset
   train_test_split(X, y, full_set, 'min_max', 'full', review_ids)
   train_test_split(X, y, full_set, 'tf_idf', 'full', review_ids)
+
+
+if __name__ == '__main__':
+  run_train_test_split()

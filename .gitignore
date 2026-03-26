@@ -1,0 +1,9 @@
+.DS_Store
+
+# Python bytecode (safe to ignore; recreated on import)
+__pycache__/
+*.py[cod]
+*$py.class
+*.pickle
+/Pubmed results
+/.idea

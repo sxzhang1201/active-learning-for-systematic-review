@@ -1,13 +1,13 @@
-import matplotlib
-matplotlib.use('TKAgg')
+import config
+config.configure_matplotlib()
 import matplotlib.pyplot as plt
 
 from basic_funcs import load_dataset, calculate_wss_95
 from sklearn import linear_model
 import numpy as np
 import pickle
-import recipe
-import config
+import os
+from joblib import Parallel, delayed
 
 
 def grid_search(alphas, tols, partial_set):
@@ -72,6 +72,7 @@ def heatmap(alphas, tols, heatmap_list):
   plt.xticks(np.arange(len(tols)), tols)
   plt.title('Grid Search WSS@95')
   # plt.show()
+  os.makedirs(os.path.dirname(config.HEAT_MAP), exist_ok=True)
   plt.savefig(config.HEAT_MAP)
   plt.close()
 
@@ -87,13 +88,14 @@ def run_grid_search(alphas, tols, partial_sets):
   :return: Heatmap of average WSS@95 for a set of datasets
   """
 
-  heatmap_dict = {}
+  config.ensure_output_dirs()
+  n_jobs = config.NUM_CORES
 
-  # Store the WSS@95 values of each dataset into a dictionary
-  for partial_set in partial_sets:
-    heatmap = grid_search(alphas, tols, partial_set)
+  def _one_partial(partial_set):
+    return partial_set, grid_search(alphas, tols, partial_set)
 
-    heatmap_dict[partial_set] = heatmap
+  pairs = Parallel(n_jobs=n_jobs)(delayed(_one_partial)(ps) for ps in partial_sets)
+  heatmap_dict = dict(pairs)
 
   heatmap_list = []
 
@@ -109,6 +111,7 @@ def run_grid_search(alphas, tols, partial_sets):
 
     heatmap_list.append(list(average))
 
+  os.makedirs(os.path.dirname(config.GRID_SEARCH), exist_ok=True)
   # Store the average WSS@95 of all combinations for all datasets
   with open(config.GRID_SEARCH, 'wb') as handle:
     pickle.dump(heatmap_list, handle, protocol=pickle.HIGHEST_PROTOCOL)

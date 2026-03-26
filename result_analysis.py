@@ -1,5 +1,5 @@
-import matplotlib
-matplotlib.use('TKAgg')
+import config
+config.configure_matplotlib()
 import matplotlib.pyplot as plt
 import numpy as np
 import Libs.file_storage as fs
