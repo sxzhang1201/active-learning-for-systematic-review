@@ -2,7 +2,6 @@ import os
 
 # Project root is the directory containing this file (not the process cwd).
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-CWD = PROJECT_ROOT
 
 DB_FILE = os.path.join(PROJECT_ROOT, 'Database', 'miner_database.db')
 

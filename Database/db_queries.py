@@ -34,30 +34,18 @@ def get_review_names():
 
 
 def get_review_indices():
-  review_id_query = db.Article.select(db.Article.review_id).order_by(db.Article.id).execute()
-
-  review_ids = [x.review_id for x in review_id_query]
-
+  """Contiguous (start, end) row slices per review_id, in Article id order."""
+  q = db.Article.select(db.Article.review_id).order_by(db.Article.id)
+  if config.DEBUG is True:
+    q = q.limit(10)
+  review_ids = [x.review_id for x in q.execute()]
+  if not review_ids:
+    return []
   indices = []
-
-  last_review = None
-  first_spotted = 0
-
-  for i in range(len(review_ids)):
-    review_id = review_ids[i]
-
-    if last_review is None:
-      last_review = review_id
-
-    if i < len(review_ids) - 1:
-      next_review_id = review_ids[i]
-      
-      if next_review_id != last_review:
-        indices.append((first_spotted, i))
-
-        first_spotted = i
-        last_review = next_review_id
-    else:
-      indices.append((first_spotted, i + 1))
-
+  first = 0
+  for i in range(len(review_ids) - 1):
+    if review_ids[i] != review_ids[i + 1]:
+      indices.append((first, i + 1))
+      first = i + 1
+  indices.append((first, len(review_ids)))
   return indices

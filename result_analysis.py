@@ -1,12 +1,13 @@
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 import config
 config.configure_matplotlib()
 import matplotlib.pyplot as plt
 import numpy as np
 import Libs.file_storage as fs
-
-
-def boxplot():
-  pass
 
 
 def get_OMB_list(result):
@@ -51,7 +52,7 @@ if __name__ == '__main__':
     results = fs.open_results(review_name = review, run_similarity = False)['results']
 
     for result in results:
-      performance_by_review. append(get_OMB_list(result))
+      performance_by_review.append(get_OMB_list(result))
 
     baseline_performance.append(performance_by_review)
 

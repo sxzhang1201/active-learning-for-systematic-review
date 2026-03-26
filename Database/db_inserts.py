@@ -1,16 +1,13 @@
-import os
 import sys
+from pathlib import Path
 
-_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if _ROOT not in sys.path:
-  sys.path.insert(0, _ROOT)
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import Database.db as db
 import config
 import progressbar, re
 from peewee import *
 
-db_obj = SqliteDatabase(config.DB_FILE)
 
 class Connector:
 
@@ -24,7 +21,7 @@ class Connector:
     for pubmed_id in pubmed_ids:
       data_list.append(dict(pubmed_id = pubmed_id, search_query = query))
 
-    with db_obj.atomic():
+    with db.conn.atomic():
       for idx in range(0, len(data_list), config.DB_INSERT_LIMIT):
         db.Search_results.insert_many(data_list[idx:idx + config.DB_INSERT_LIMIT]).execute()
 
@@ -43,9 +40,6 @@ class Connector:
     if self.SQLITE_MAX_VARIABLE_NUMBER is None:
       self.SQLITE_MAX_VARIABLE_NUMBER = db.max_sql_variables()
 
-    pubmed_ids = []
-    article_list = []
-
     print('Inserting %i articles.' % len(articles))
 
     bar = progressbar.ProgressBar()
@@ -55,7 +49,7 @@ class Connector:
     for idx in bar(range(0, len(articles))):
       article_data = articles[idx]
       batch_item = batch.iloc[idx]
-      
+
       journal_id = None
 
       if article_data['journal_title'] is not None:
@@ -75,10 +69,8 @@ class Connector:
           'included': batch_item['included'],
           'review_id': batch_item['review_id'],
         })
-      except (AttributeError):
-        print(idx)
-        print(article_data)
-        quit()
+      except AttributeError as exc:
+        raise RuntimeError('Bad article field at index %r: %r' % (idx, article_data)) from exc
 
     print('\n')
 
@@ -108,9 +100,9 @@ class Connector:
     try:
       found_journal = db.Journal.get(
           (db.Journal.title == journal['title'])
-          or (db.Journal.iso == journal['iso'])
-          or (db.Journal.iso_stripped == journal['iso_stripped'])
-          or (db.Journal.issn == journal['issn']))
+          | (db.Journal.iso == journal['iso'])
+          | (db.Journal.iso_stripped == journal['iso_stripped'])
+          | (db.Journal.issn == journal['issn']))
     except db.Journal.DoesNotExist:
       found_journal = db.Journal.create(**journal)
 

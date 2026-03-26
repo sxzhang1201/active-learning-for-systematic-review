@@ -30,7 +30,6 @@ def create_matrix_collection(matrix, document_collection):
   matrix_collection = matrix_class.Feature_matrix()
 
   review_indices = db.get_review_indices()
-  print(review_indices)
   pubmed_ids = document_collection.get_pubmed_ids()
   review_names = document_collection.get_review_names()
 

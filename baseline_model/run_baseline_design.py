@@ -1,12 +1,11 @@
-import os
 import sys
+from pathlib import Path
 
-_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if _ROOT not in sys.path:
-  sys.path.insert(0, _ROOT)
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import numpy as np
 import config
+from basic_funcs import available_dataset_indices
 from baseline_model.tf_idf import run_tf_idf, plot_tf_idf
 from baseline_model.class_imbalance import run_class_imbalance, plot_class_imbalance
 from baseline_model.grid_search import run_grid_search, heatmap
@@ -15,7 +14,13 @@ from baseline_model.grid_search import run_grid_search, heatmap
 if __name__ == '__main__':
 
   config.ensure_output_dirs()
-  partial_sets = [1, 2, 3, 4, 5]
+  partial_sets = available_dataset_indices('partial', required_types=['min_max', 'tf_idf'])
+  if not partial_sets:
+    raise RuntimeError(
+        "No partial dataset pickles found. Run data_preparation/clean_docs.py and "
+        "data_preparation/dataset_split.py first."
+    )
+  print('Using partial datasets:', partial_sets)
 
   alphas = list(10.0 ** -np.arange(1, 8))
   tols = list(10.0 ** -np.arange(2, 9))

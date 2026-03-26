@@ -8,10 +8,9 @@ Build preprocessed document vectors from the SQLite DB:
 import os
 import sys
 import pickle
+from pathlib import Path
 
-_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if _ROOT not in sys.path:
-  sys.path.insert(0, _ROOT)
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import Database.db  # noqa: F401
 import Database.db_queries as db

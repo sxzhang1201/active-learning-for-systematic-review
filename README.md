@@ -21,7 +21,7 @@ run_baseline.py, run_similarity.py, and result_analysis.py are updated codes for
 
 ### Prerequisites
 
-The whole project is implemented in Python. The required packages are listed in requirement.txt. 
+The whole project is implemented in Python. The required packages are listed in `requirements.txt`.
 
 ### Installing
 
@@ -33,9 +33,10 @@ $pip install -r requirements.txt
 
 To get the results of all experiments, you should execute the following Python Scripts step-by-step:
 
-#### 1. parse_example.py and run_data_preparation.py in 'data_preparation' folder
+#### 1. Scripts in `data_preparation/`
 
-This creates: a SQL database in the folder 'Database'; fifty pickle files (forty full datasets and ten partial datasets) in the folder 'Datasets'; and one 'word frequency' graph in the folder 'Figure'.
+This creates: a SQL database under `Database/`; dataset pickles under `Datasets/`; preprocessed matrices under `Text_data/`; and figures under `Figure/` when you run downstream steps.
+
 ##### fetch_raw.py
 Loop the qrel files (train and test) and fetch the pubmed articles, stick them in a pickle file.
 

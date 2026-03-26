@@ -1,7 +1,3 @@
-import config
-import pickle
-import Libs.file_storage as file_handle
-
 class DocumentCollection(object):
   def __init__(self):
     self.documents = []

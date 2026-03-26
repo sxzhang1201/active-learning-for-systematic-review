@@ -67,10 +67,11 @@ def plot_tf_idf():
 
   with (open(config.TF_IDF_RESULTS, "rb")) as openfile:
     tf_idf = pickle.load(openfile)
+  n_points = len(tf_idf[0]) if tf_idf else 0
 
   plt.boxplot(tf_idf)
 
-  plt.xticks((1, 2), ('TF \n n = 5', 'TF-IDF \n n = 5'))
+  plt.xticks((1, 2), ('TF \n n = {}'.format(n_points), 'TF-IDF \n n = {}'.format(n_points)))
   plt.ylabel('WSS@95')
   plt.ylim([-0.05, 0.5])
 

@@ -32,8 +32,8 @@ class Feature_matrix(object):
 
     for name in review_names:
       review_idx = self.review_indices[self.review_names.index(name)]
-
-      mask[range(review_idx[0], review_idx[1])] = False
+      lo, hi = review_idx[0], review_idx[1]
+      mask[lo:hi] = False
 
     X_train = self.feature_matrix[~mask, :]
     y_train = np.asarray(labels)[~mask]
@@ -43,9 +43,10 @@ class Feature_matrix(object):
 
   def get_test_set(self, review_name, labels):
     review_idx = self.review_indices[self.review_names.index(review_name)]
+    lo, hi = review_idx[0], review_idx[1]
 
     mask = np.ones(self.feature_matrix.shape[0], dtype = bool)
-    mask[range(review_idx[0], review_idx[1])] = False
+    mask[lo:hi] = False
 
     X_test = self.feature_matrix[~mask, :]
     y_test = np.asarray(labels)[~mask]

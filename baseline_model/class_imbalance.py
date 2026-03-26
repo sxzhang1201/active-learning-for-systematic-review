@@ -122,35 +122,38 @@ def plot_class_imbalance():
   # Plot boxplot
   plt.boxplot(imba_list)
 
-  plt.xticks((1, 2, 3, 4), ('none \n n = 5', 'random \n undersampling \n n = 50',
-                            'random \n oversampling \n n = 50', 'weighting \n n = 5'))
+  n_none = len(imba_list[0]) if imba_list else 0
+  n_under = len(imba_list[1]) if len(imba_list) > 1 else 0
+  n_over = len(imba_list[2]) if len(imba_list) > 2 else 0
+  n_weight = len(imba_list[3]) if len(imba_list) > 3 else 0
+  plt.xticks((1, 2, 3, 4), ('none \n n = {}'.format(n_none), 'random \n undersampling \n n = {}'.format(n_under),
+                            'random \n oversampling \n n = {}'.format(n_over), 'weighting \n n = {}'.format(n_weight)))
   plt.ylabel('WSS@95')
 
   plt.ylim([-0.05, 0.5])
 
   # A list of colors used for labelling different datasets
-  color = ['r', 'g', 'b', 'y', 'c']
+  color = ['r', 'g', 'b', 'y', 'c', 'm', 'k']
 
   for i in range(len(imba_list)):
 
     y = imba_list[i]
 
     if i == 0 or i == 3:
-
       x = list(np.random.normal(i + 1, 0.04, size=len(y)))
-
-      for j in range(5):
-
-        plt.scatter(x[j], y[j], c=color[j], alpha=0.6, s=16)
+      for j in range(len(y)):
+        plt.scatter(x[j], y[j], c=color[j % len(color)], alpha=0.6, s=16)
 
     else:
 
       x = list(np.random.normal(i + 1, 0.04, size=len(y)))
-
-      plt.scatter(x[:10], y[:10], c=color[0], alpha=0.6, s=16)
-
-      for j in range(5):
-        plt.scatter(x[10 * j: 10 * j + 10], y[10 * j: 10 * j + 10], c=color[j], alpha=0.6, s=16)
+      # random under/over have "repeat" samples per partial dataset (default repeat=10)
+      repeat = 10
+      n_groups = int(np.ceil(len(y) / float(repeat)))
+      for j in range(n_groups):
+        lo = repeat * j
+        hi = min(repeat * (j + 1), len(y))
+        plt.scatter(x[lo:hi], y[lo:hi], c=color[j % len(color)], alpha=0.6, s=16)
 
   # plt.show()
   os.makedirs(os.path.dirname(config.CLASS_IMBALANCE_FIGURE), exist_ok=True)

@@ -32,7 +32,7 @@ def vectorize(document_collection):
   # Learn all tokens in the corpus
   vectorizer.fit(corpus)
 
-  # Tranform documents to a document-term matrix
+  # Transform documents to a document-term matrix
   tf_matrix = vectorizer.transform(corpus)
 
   # Create and store a matrix collection class
@@ -63,7 +63,7 @@ def word_freq(split_corpus, path):
 def get_cosine_similarity(matrix_collection):
   matrix = matrix_collection.get_feature_matrix()
   review_indices = matrix_collection.get_review_indices()
-  labels = matrix_collection.get_review_names()
+  review_names = matrix_collection.get_review_names()
   
   review_means = list()
 
@@ -85,7 +85,7 @@ def get_cosine_similarity(matrix_collection):
   
   # Put into a pandas dataframe where we can add row and
   # column labels with the review label (e.g. CD010276)
-  df = pd.DataFrame(cos_sim, index = labels, columns = labels)
+  df = pd.DataFrame(cos_sim, index=review_names, columns=review_names)
 
   # Store as a pickle file and csv file
   fs.store_matrix('cosine_sim_matrix', df)

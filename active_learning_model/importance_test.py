@@ -140,8 +140,6 @@ def run_importance(partial_set, query_strategy, optimal_alpha, optimal_tol, impo
       if y_u_pool.iloc[query_index] == 1:
         tp_reviewer_list.append(query_index)
 
-    print(" Length of Unlabelled Pool", len(y_u_pool))
-
     # Remove X and y of query documents from Unlabelled pool
     X_u_pool = delete_row_csr(X_u_pool, query_indices)
     y_u_pool = y_u_pool.drop(y_u_pool.index[query_indices])

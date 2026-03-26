@@ -46,7 +46,6 @@ def active_learning(index, query_strategy, importance=None):
   N = len(y_u_pool)
 
   N_relevant = y_u_pool.sum()
-  print('Number of Relevant Documents', N_relevant)
 
   # Determine which relevant document will be used as the threshold for calculating WSS@95
   n_relevant_95 = int(round(N_relevant * (1 - 0.95)))
@@ -65,37 +64,6 @@ def active_learning(index, query_strategy, importance=None):
 
     # Get distance of all relevant documents to the hyperplane
     d_relevant = distance[N_indices]
-
-    ### ---------------------------------
-
-    # if num_of_iter in record_point:
-    #
-    #   # Plot stacked histogram!
-    #   plt.hist([d_relevant, distance], bins=30, stacked=True,
-    #            density=True, color=['#56B4E9', '#F0E442'], label=['Relevant Docs', 'All Docs'])
-    #   axes = plt.gca()
-    #   axes.set_xlim([-20, 20])
-    #   axes.set_ylim([0, 0.30])
-    #
-    #
-    #   plt.plot(min(d_relevant), 0, 'o', color='b', label='Min')
-    #   plt.plot(max(d_relevant), 0, 'o', color='b', label='Max')
-    #
-    #
-    #
-    #   plt.legend()
-    #   plt.title('Dataset {} - Iteration {}'.format(i - 10, num_of_iter))
-    #
-    #   plt.axvline(x=min(d_relevant), color='r', linestyle='dashed', label='%.2f' % min(d_relevant))
-    #
-    #   plt.axvline(x=max(d_relevant), color='r', linestyle='dashed', label='%.2f' % max(d_relevant))
-    #
-    #   plt.savefig('Figure/Dataset_2_and_7/{}_{}_distance_histogram.pdf'.format(i - 10, num_of_iter))
-    #   # plt.show()
-    #
-    #   plt.close()
-
-    ### ---------------------------------
 
     # Calculate WSS@95 (two situations)
     if y_u_pool.sum() > n_relevant_95:
@@ -118,29 +86,6 @@ def active_learning(index, query_strategy, importance=None):
       threshold_dis_100 = np.sort(d_relevant)[0]
       wss_100 = len(distance[distance < threshold_dis_100]) / N
 
-    # Plot Histogram of Distance
-    # if num_of_iter % 50 == 0:
-    #
-    #   # plot histogram for the distance
-    #   plt.hist(distance, bins=300, density=True)
-    #   axes = plt.gca()
-    #   axes.set_ylim([0, 1])
-    #
-    #   # plot threshold line
-    #   plt.axvline(x=d_relevant[np.argmin(distance[N_indices])], color='r',
-    #               linestyle='dashed', label='%.2f' % threshold_dis_100)
-    #
-    #   plt.figtext(.2, .75, 'WSS@100 = %.2f ' % wss_100)
-    #   plt.figtext(.2, .8, 'iteration = {}'.format(num_of_iter * 2))
-    #
-    #   plt.legend()
-    #
-    #   plt.savefig('Figure/Distance_Distribution/dive_into_2/{}_iteration_{}.pdf'.format((i - 10), num_of_iter * 2))
-    #
-    #   # plt.show()
-    #
-    #   plt.close()
-
     # Storing Data
     number_query_docs.append(num_of_iter * 2)
     wss_95_list.append(wss_95)
@@ -155,8 +100,6 @@ def active_learning(index, query_strategy, importance=None):
 
     # List of Documents that are to be reviewed by the oracle (reviewer)
     reviewer_list = reviewer_list + list(query_indices)
-
-    print(" Length of Unlabelled Pool", len(y_u_pool))
 
     # Remove X and y of query documents from Unlabelled pool
     X_u_pool = delete_row_csr(X_u_pool, query_indices)
@@ -225,27 +168,17 @@ def plot_added_value():
 
 
 def get_result_table():
-  """
-  Print the required variables, and copy them into the Excel table.
-  (In the future, need to directly export them into a csv file)
-  :return:
-  """
-
-  for index in range(1, 21):
-
-    number_query_docs, wss_95_list, wss_100_list = load_added_value_results(index)
-
-    index = wss_100_list.index(max(wss_100_list))
-
-    num_docs = number_query_docs[index]/number_query_docs[-1]
-
-    # Number of query documents when max WSS is reached
-    print(num_docs)
-
-    # The baseline WSS
-    print(wss_95_list[0])
-    print(wss_100_list[0])
-
-    # The Max WSS
-    print(max(wss_95_list))
-    print(max(wss_100_list))
+  """Summarize added-value runs for datasets 1..20 (for export / inspection)."""
+  rows = []
+  for ds_index in range(1, 21):
+    number_query_docs, wss_95_list, wss_100_list = load_added_value_results(ds_index)
+    idx_max = wss_100_list.index(max(wss_100_list))
+    rows.append({
+        'dataset': ds_index,
+        'query_frac_at_max_wss100': number_query_docs[idx_max] / number_query_docs[-1],
+        'wss95_baseline': wss_95_list[0],
+        'wss100_baseline': wss_100_list[0],
+        'wss95_max': max(wss_95_list),
+        'wss100_max': max(wss_100_list),
+    })
+  return rows
