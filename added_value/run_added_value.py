@@ -24,4 +24,8 @@ if __name__ == '__main__':
 
   plot_added_value()
 
-  correlation()
+  corr_out = correlation()
+  if corr_out is None:
+    print('Skip correlation: missing Consolidation/correlation_input.xlsx')
+  else:
+    print('Wrote correlation output to {}'.format(corr_out))

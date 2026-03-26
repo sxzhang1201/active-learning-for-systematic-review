@@ -6,6 +6,7 @@ from sklearn import linear_model
 import numpy as np
 import pickle
 import os
+import re
 
 from basic_funcs import delete_row_csr, load_added_value_results, load_full_dataset
 from active_learning_model.query_strategy import choose_query
@@ -134,10 +135,24 @@ def plot_added_value():
   # Plot the trends of WSS@100 deducted by the baseline WSS@100 for twenty reviews
 
   review_ids = ["CD010438", "CD011984", "CD008643", "CD009944", "CD007427", "CD009593", "CD011549",
-              "CD011134", "CD008686", "CD011975", "CD009323", "CD009020", "CD011548", "CD010409",
-              "CD008054", "CD010771", "CD009591", "CD008691", "CD010632", "CD007394"]
+                "CD011134", "CD008686", "CD011975", "CD009323", "CD009020", "CD011548", "CD010409",
+                "CD008054", "CD010771", "CD009591", "CD008691", "CD010632", "CD007394"]
+  pattern = re.compile(r'^([0-9]+)_added_value\.pickle$')
+  indices = []
+  if os.path.isdir(config.CONSOLIDATION_ADDED_VALUE):
+    for filename in os.listdir(config.CONSOLIDATION_ADDED_VALUE):
+      match = pattern.match(filename)
+      if match is not None:
+        indices.append(int(match.group(1)))
+  indices = sorted(indices)
+  if not indices:
+    raise RuntimeError(
+        "No added-value result files found in {}. Run added_value/run_added_value.py first.".format(
+            config.CONSOLIDATION_ADDED_VALUE
+        )
+    )
 
-  for index in range(1, 21):
+  for index in indices:
     number_query_docs, _, wss_100_list = load_added_value_results(index)
 
     # Substract baseline WSS from the active learning WSS
@@ -157,7 +172,8 @@ def plot_added_value():
     # plt.axvline(x=96, color='b', linestyle='dashed', label='x=96%')
     plt.ylabel('WSS@100', fontsize=10)
     plt.xlabel('Number of documents to be queried from the unlabeled pool', fontsize=10)
-    plt.figtext(.2, .8, 'Review: {}'.format(review_ids[index - 1]))
+    review_name = review_ids[index - 1] if 1 <= index <= len(review_ids) else str(index)
+    plt.figtext(.2, .8, 'Review(s): {}'.format(review_name))
     # Set a baseline line
 
   plt.axhline(y=0, color='r', linestyle='dashed', label='Baseline WSS')
@@ -168,9 +184,18 @@ def plot_added_value():
 
 
 def get_result_table():
-  """Summarize added-value runs for datasets 1..20 (for export / inspection)."""
+  """Summarize all available added-value runs (for export / inspection)."""
+  pattern = re.compile(r'^([0-9]+)_added_value\.pickle$')
+  ds_indices = []
+  if os.path.isdir(config.CONSOLIDATION_ADDED_VALUE):
+    for filename in os.listdir(config.CONSOLIDATION_ADDED_VALUE):
+      match = pattern.match(filename)
+      if match is not None:
+        ds_indices.append(int(match.group(1)))
+  ds_indices = sorted(ds_indices)
+
   rows = []
-  for ds_index in range(1, 21):
+  for ds_index in ds_indices:
     number_query_docs, wss_95_list, wss_100_list = load_added_value_results(ds_index)
     idx_max = wss_100_list.index(max(wss_100_list))
     rows.append({
